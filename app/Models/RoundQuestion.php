@@ -10,4 +10,5 @@ class RoundQuestion extends Model
     protected $fillable = ['round_id','level_id','question_id','sort_order'];
 
     public function round(): BelongsTo { return $this->belongsTo(Round::class); }
+    public function question(): BelongsTo { return $this->belongsTo(Question::class); }
 }

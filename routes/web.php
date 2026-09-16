@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\CandidateAdminController;
 use App\Http\Controllers\Admin\ExamEventAdminController;
+use App\Http\Controllers\Admin\ExamMonitorController;
 use App\Http\Controllers\Admin\QuestionAdminController;
 use App\Http\Controllers\Admin\RoundAdminController;
 use App\Http\Controllers\Admin\SpeakingAdminController;
@@ -38,6 +39,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/', AdminDashboardController::class)->name('dashboard');
         Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
 
+        Route::get('/monitor', ExamMonitorController::class)->name('monitor');
+
         Route::get('/events', [ExamEventAdminController::class, 'index'])->name('events.index');
         Route::post('/events', [ExamEventAdminController::class, 'store'])->name('events.store');
         Route::put('/events/{event}', [ExamEventAdminController::class, 'update'])->name('events.update');
@@ -49,6 +52,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/candidates/export-excel', [CandidateAdminController::class, 'exportExcel'])->name('candidates.export-excel');
         Route::get('/candidates/excel-template', [CandidateAdminController::class, 'downloadTemplate'])->name('candidates.excel-template');
         Route::post('/candidates/import-excel', [CandidateAdminController::class, 'importExcel'])->name('candidates.import-excel');
+        Route::get('/candidates/{candidate}', [CandidateAdminController::class, 'show'])->name('candidates.show');
+        Route::post('/candidates/{candidate}/allow-exam', [CandidateAdminController::class, 'allowExam'])->name('candidates.allow-exam');
+        Route::post('/candidates/{candidate}/lock-exam', [CandidateAdminController::class, 'lockExam'])->name('candidates.lock-exam');
+        Route::post('/candidates/{candidate}/rounds/{round}/retake', [CandidateAdminController::class, 'retake'])->name('candidates.retake');
         Route::put('/candidates/{candidate}', [CandidateAdminController::class, 'update'])->name('candidates.update');
         Route::delete('/candidates/{candidate}', [CandidateAdminController::class, 'destroy'])->name('candidates.destroy');
 
@@ -57,6 +64,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/speaking/{session}/score', [SpeakingAdminController::class, 'score'])->name('speaking.score');
 
         Route::get('/questions', [QuestionAdminController::class, 'index'])->name('questions.index');
+        Route::get('/questions/excel-template', [QuestionAdminController::class, 'downloadTemplate'])->name('questions.excel-template');
+        Route::get('/questions/export-excel', [QuestionAdminController::class, 'exportExcel'])->name('questions.export-excel');
+        Route::post('/questions/import-excel', [QuestionAdminController::class, 'importExcel'])->name('questions.import-excel');
         Route::post('/questions', [QuestionAdminController::class, 'store'])->name('questions.store');
         Route::delete('/questions/bulk', [QuestionAdminController::class, 'bulkDestroy'])->name('questions.bulk-destroy');
         Route::put('/questions/{question}', [QuestionAdminController::class, 'update'])->name('questions.update');
