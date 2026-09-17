@@ -22,7 +22,11 @@ class ScoringService
                 $isCorrect = false;
                 $awarded = 0;
 
-                if ($answer->option_id) {
+                if ($answer->question->answer_mode === 'text') {
+                    $normalize = fn ($value) => mb_strtolower(trim(preg_replace('/\s+/u', ' ', (string) $value)));
+                    $accepted = collect($answer->question->accepted_answers ?? [])->map($normalize);
+                    $isCorrect = $accepted->contains($normalize($answer->text_answer));
+                } elseif ($answer->option_id) {
                     $isCorrect = QuestionOption::query()
                         ->whereKey($answer->option_id)
                         ->where('question_id', $answer->question_id)

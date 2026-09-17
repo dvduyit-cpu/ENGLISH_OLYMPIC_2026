@@ -64,6 +64,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/speaking/{session}/score', [SpeakingAdminController::class, 'score'])->name('speaking.score');
 
         Route::get('/questions', [QuestionAdminController::class, 'index'])->name('questions.index');
+        Route::get('/rounds/{round}/preview', [QuestionAdminController::class, 'preview'])->name('questions.preview');
         Route::get('/questions/excel-template', [QuestionAdminController::class, 'downloadTemplate'])->name('questions.excel-template');
         Route::get('/questions/export-excel', [QuestionAdminController::class, 'exportExcel'])->name('questions.export-excel');
         Route::post('/questions/import-excel', [QuestionAdminController::class, 'importExcel'])->name('questions.import-excel');

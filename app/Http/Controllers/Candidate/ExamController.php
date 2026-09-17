@@ -71,7 +71,7 @@ class ExamController extends Controller
 
         $answers = AttemptAnswer::query()
             ->where('attempt_id', $attempt->id)
-            ->pluck('option_id', 'question_id');
+            ->get()->keyBy('question_id');
 
         $remainingSeconds = $this->remainingSeconds($attempt, $round);
 
@@ -89,26 +89,38 @@ class ExamController extends Controller
 
         $data = $request->validate([
             'question_id' => ['required', 'integer'],
-            'option_id' => ['required', 'integer'],
+            'option_id' => ['nullable', 'integer'],
+            'text_answer' => ['nullable', 'string', 'max:500'],
         ]);
 
-        $allowedQuestion = RoundQuestion::query()
-            ->where('round_id', $round->id)
-            ->where('round_questions.level_id', $candidate->level_id)
-            ->where('question_id', $data['question_id'])
-            ->exists();
-
-        abort_unless($allowedQuestion, 422, 'Câu hỏi không thuộc bộ đề.');
-
-        $option = QuestionOption::query()
-            ->whereKey($data['option_id'])
-            ->where('question_id', $data['question_id'])
+        $question = Question::query()
+            ->whereKey($data['question_id'])
+            ->whereHas('roundAssignments', fn ($query) => $query
+                ->where('round_id', $round->id)
+                ->where('level_id', $candidate->level_id))
             ->firstOrFail();
 
-        AttemptAnswer::updateOrCreate(
-            ['attempt_id' => $attempt->id, 'question_id' => $data['question_id']],
-            ['option_id' => $option->id, 'answered_at' => now()]
-        );
+        if ($question->answer_mode === 'text') {
+            $textAnswer = trim((string) ($data['text_answer'] ?? ''));
+            if ($textAnswer === '') {
+                AttemptAnswer::where('attempt_id', $attempt->id)->where('question_id', $question->id)->delete();
+                return response()->json(['ok' => true, 'saved_at' => now()->toIso8601String()]);
+            }
+            AttemptAnswer::updateOrCreate(
+                ['attempt_id' => $attempt->id, 'question_id' => $question->id],
+                ['option_id' => null, 'text_answer' => $textAnswer, 'answered_at' => now()]
+            );
+        } else {
+            abort_unless(!empty($data['option_id']), 422, 'Vui lòng chọn một đáp án.');
+            $option = QuestionOption::query()
+                ->whereKey($data['option_id'])
+                ->where('question_id', $question->id)
+                ->firstOrFail();
+            AttemptAnswer::updateOrCreate(
+                ['attempt_id' => $attempt->id, 'question_id' => $question->id],
+                ['option_id' => $option->id, 'text_answer' => null, 'answered_at' => now()]
+            );
+        }
 
         return response()->json(['ok' => true, 'saved_at' => now()->toIso8601String()]);
     }

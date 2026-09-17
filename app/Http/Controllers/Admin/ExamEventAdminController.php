@@ -47,6 +47,7 @@ class ExamEventAdminController extends Controller
         return $request->validate([
             'name'=>['required','string','max:255'],'starts_at'=>['required','date'],'ends_at'=>['required','date','after:starts_at'],
             'status'=>['required','in:draft,active,finished'],'exam_level'=>['required','in:KET,PET'],
+            'round_1_questions'=>['required','integer','min:1','max:500'],'round_2_questions'=>['required','integer','min:1','max:500'],'round_3_questions'=>['required','integer','min:1','max:500'],
             'round_1_minutes'=>['required','integer','min:1','max:300'],'round_2_minutes'=>['required','integer','min:1','max:300'],'round_3_minutes'=>['required','integer','min:1','max:300'],
         ]);
     }
@@ -59,6 +60,6 @@ class ExamEventAdminController extends Controller
     private function syncRounds(ExamEvent $event, array $data): void
     {
         $definitions = [1=>['ROUND 1 – GENERAL KNOWLEDGE',20],2=>['ROUND 2 – LANGUAGE KNOWLEDGE',30],3=>['ROUND 3 – SKILLS CHALLENGE',30]];
-        foreach ($definitions as $order => [$name,$questions]) { $round = $event->rounds()->firstOrNew(['round_order'=>$order]); $round->fill(['name'=>$name,'number_questions'=>$questions,'time_limit_seconds'=>$data['round_'.$order.'_minutes']*60]); if (!$round->exists) $round->status = 'waiting'; $round->save(); }
+        foreach ($definitions as $order => [$name]) { $round = $event->rounds()->firstOrNew(['round_order'=>$order]); $round->fill(['name'=>$name,'number_questions'=>$data['round_'.$order.'_questions'],'time_limit_seconds'=>$data['round_'.$order.'_minutes']*60]); if (!$round->exists) $round->status = 'waiting'; $round->save(); }
     }
 }

@@ -138,6 +138,27 @@ class QuestionAdminController extends Controller
     {
         return response()->streamDownload(function()use($spreadsheet){(new Xlsx($spreadsheet))->save('php://output');$spreadsheet->disconnectWorksheets();},$filename,['Content-Type'=>'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']);
     }
+    public function preview(Request $request, Round $round)
+    {
+        $level = Level::findOrFail($request->integer('level_id'));
+        $event = $round->examEvent;
+        $levelAllowed = ($level->code === 'KET' && $event->allow_ket)
+            || ($level->code === 'PET' && $event->allow_pet);
+        abort_unless($levelAllowed, 404);
+
+        $questions = Question::query()
+            ->select('questions.*')
+            ->join('round_questions', 'round_questions.question_id', '=', 'questions.id')
+            ->where('round_questions.round_id', $round->id)
+            ->where('round_questions.level_id', $level->id)
+            ->where('questions.is_active', true)
+            ->orderBy('round_questions.sort_order')
+            ->limit($round->number_questions)
+            ->with(['options' => fn ($query) => $query->orderBy('option_code')])
+            ->get();
+
+        return view('admin.exam-preview', compact('event', 'round', 'level', 'questions'));
+    }
     private function validated(Request $request): array
     {
         return $request->validate([

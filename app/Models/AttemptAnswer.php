@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class AttemptAnswer extends Model
 {
     protected $fillable = [
-        'attempt_id','question_id','option_id','is_correct','points_awarded','answered_at'
+        'attempt_id','question_id','option_id','text_answer','is_correct','points_awarded','answered_at'
     ];
     protected $casts = ['is_correct' => 'boolean', 'answered_at' => 'datetime'];
 

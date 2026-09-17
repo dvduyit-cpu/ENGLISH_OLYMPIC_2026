@@ -9,10 +9,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Question extends Model
 {
     protected $fillable = [
-        'level_id','category_id','question_type','question_text',
+        'level_id','category_id','question_type','answer_mode','question_text','accepted_answers',
         'passage_text','audio_path','image_path','points','is_active'
     ];
-    protected $casts = ['is_active' => 'boolean', 'points' => 'decimal:2'];
+    protected $casts = ['is_active' => 'boolean', 'points' => 'decimal:2', 'accepted_answers' => 'array'];
 
     public function level(): BelongsTo { return $this->belongsTo(Level::class); }
     public function category(): BelongsTo { return $this->belongsTo(Category::class); }
