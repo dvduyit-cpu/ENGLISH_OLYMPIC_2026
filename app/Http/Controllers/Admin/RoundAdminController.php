@@ -20,15 +20,15 @@ class RoundAdminController extends Controller
         return back()->with('message', 'Đã mở '.$round->name.'.');
     }
 
-    public function openAll()
+    public function openAll(Request $request)
     {
-        Round::query()->update(['status' => 'open', 'opened_at' => now(), 'closed_at' => null]);
+        Round::query()->when($request->integer('event_id'), fn ($query, $eventId) => $query->where('exam_event_id', $eventId))->update(['status' => 'open', 'opened_at' => now(), 'closed_at' => null]);
         return back()->with('message', 'Đã mở tất cả các Round.');
     }
 
-    public function closeAll()
+    public function closeAll(Request $request)
     {
-        Round::query()->where('status', 'open')->update(['status' => 'closed', 'closed_at' => now()]);
+        Round::query()->when($request->integer('event_id'), fn ($query, $eventId) => $query->where('exam_event_id', $eventId))->where('status', 'open')->update(['status' => 'closed', 'closed_at' => now()]);
         return back()->with('message', 'Đã đóng tất cả các Round.');
     }
 

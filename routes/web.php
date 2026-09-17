@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\CandidateAdminController;
 use App\Http\Controllers\Admin\ExamEventAdminController;
 use App\Http\Controllers\Admin\ExamMonitorController;
 use App\Http\Controllers\Admin\QuestionAdminController;
+use App\Http\Controllers\Admin\RankingsController;
 use App\Http\Controllers\Admin\RoundAdminController;
 use App\Http\Controllers\Admin\SpeakingAdminController;
 use App\Http\Controllers\Candidate\CandidateAuthController;
@@ -40,6 +41,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
 
         Route::get('/monitor', ExamMonitorController::class)->name('monitor');
+        Route::get('/rankings', RankingsController::class)->name('rankings');
+        Route::get('/rankings/export', [RankingsController::class, 'export'])->name('rankings.export');
 
         Route::get('/events', [ExamEventAdminController::class, 'index'])->name('events.index');
         Route::post('/events', [ExamEventAdminController::class, 'store'])->name('events.store');
